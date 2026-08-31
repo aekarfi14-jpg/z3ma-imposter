@@ -1,0 +1,21 @@
+{
+  "appId": "com.z3ma.imposter",
+  "appName": "Z3MA IMPOSTER",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#020617",
+      "showSpinner": false
+    }
+  }
+}

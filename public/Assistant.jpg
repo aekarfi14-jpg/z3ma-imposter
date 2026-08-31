@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+    <defs>
+      <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#241505" />
+        <stop offset="100%" stop-color="#451a03" />
+      </linearGradient>
+      <radialGradient id="glow" cx="50%" cy="50%" r="60%">
+        <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35" />
+        <stop offset="100%" stop-color="#f59e0b" stop-opacity="0" />
+      </radialGradient>
+      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#f59e0b" stroke-opacity="0.08" stroke-width="1" />
+      </pattern>
+    </defs>
+    
+    <rect width="800" height="800" fill="url(#bg)" />
+    <rect width="800" height="800" fill="url(#grid)" />
+    <circle cx="400" cy="400" r="350" fill="url(#glow)" />
+    
+    <!-- Outer Cyber Border -->
+    <rect x="24" y="24" width="752" height="752" rx="32" fill="none" stroke="#f59e0b" stroke-width="3" stroke-opacity="0.4" stroke-dasharray="16 8" />
+    <rect x="36" y="36" width="728" height="728" rx="24" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-opacity="0.2" />
+
+    <!-- Center Icon Area -->
+    <g transform="translate(400, 360)">
+      <circle r="130" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="4"/>
+     <path d="M-50 -40 Q0 -90 50 -40 Q50 60 0 80 Q-50 60 -50 -40 Z" fill="#f59e0b" fill-opacity="0.8"/>
+     <circle cx="-20" cy="-20" r="10" fill="#ffffff"/>
+     <circle cx="20" cy="-20" r="10" fill="#ffffff"/>
+     <line x1="0" y1="0" x2="0" y2="40" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+    </g>
+
+    <!-- Title & Subtitle -->
+    <text x="400" y="580" text-anchor="middle" font-family="'Cairo', 'Outfit', sans-serif" font-weight="900" font-size="44" fill="#ffffff" letter-spacing="2">
+      المساعد السري 🤫
+    </text>
+    <text x="400" y="635" text-anchor="middle" font-family="'Cairo', 'Outfit', sans-serif" font-weight="600" font-size="24" fill="#f59e0b" letter-spacing="1">
+      عاون صاحبك الـ Imposter بلا ما تفضحو!
+    </text>
+    
+    <!-- Bottom Badge -->
+    <rect x="280" y="680" width="240" height="42" rx="21" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1.5" />
+    <text x="400" y="708" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="800" font-size="18" fill="#ffffff" letter-spacing="4">
+      Z3MA IMPOSTER
+    </text>
+  </svg>

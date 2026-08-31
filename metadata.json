@@ -1,0 +1,6 @@
+{
+  "name": "Z3MA IMPOSTER",
+  "description": "لعبة الحفلات والذكاء والخداع بهاتف واحد بدون إنترنت - Z3MA IMPOSTER",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

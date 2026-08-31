@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+    <defs>
+      <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#260408" />
+        <stop offset="100%" stop-color="#4c0519" />
+      </linearGradient>
+      <radialGradient id="glow" cx="50%" cy="50%" r="60%">
+        <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.35" />
+        <stop offset="100%" stop-color="#f43f5e" stop-opacity="0" />
+      </radialGradient>
+      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#f43f5e" stroke-opacity="0.08" stroke-width="1" />
+      </pattern>
+    </defs>
+    
+    <rect width="800" height="800" fill="url(#bg)" />
+    <rect width="800" height="800" fill="url(#grid)" />
+    <circle cx="400" cy="400" r="350" fill="url(#glow)" />
+    
+    <!-- Outer Cyber Border -->
+    <rect x="24" y="24" width="752" height="752" rx="32" fill="none" stroke="#f43f5e" stroke-width="3" stroke-opacity="0.4" stroke-dasharray="16 8" />
+    <rect x="36" y="36" width="728" height="728" rx="24" fill="none" stroke="#f43f5e" stroke-width="1.5" stroke-opacity="0.2" />
+
+    <!-- Center Icon Area -->
+    <g transform="translate(400, 360)">
+      <circle r="130" fill="#f43f5e" fill-opacity="0.2" stroke="#f43f5e" stroke-width="5"/>
+     <!-- Wolf Hood / Demon Mask -->
+     <path d="M-70 -70 L-40 -10 L0 -50 L40 -10 L70 -70 L60 30 L0 80 L-60 30 Z" fill="#f43f5e"/>
+     <polygon points="-30,0 -10,15 -35,20" fill="#facc15"/>
+     <polygon points="30,0 10,15 35,20" fill="#facc15"/>
+     <path d="M-30 45 Q0 65 30 45" stroke="#ffffff" stroke-width="6" fill="none"/>
+    </g>
+
+    <!-- Title & Subtitle -->
+    <text x="400" y="580" text-anchor="middle" font-family="'Cairo', 'Outfit', sans-serif" font-weight="900" font-size="44" fill="#ffffff" letter-spacing="2">
+      IMPOSTER 😈
+    </text>
+    <text x="400" y="635" text-anchor="middle" font-family="'Cairo', 'Outfit', sans-serif" font-weight="600" font-size="24" fill="#f43f5e" letter-spacing="1">
+      أنت هو الخداع... ما تفضحش روحك!
+    </text>
+    
+    <!-- Bottom Badge -->
+    <rect x="280" y="680" width="240" height="42" rx="21" fill="#f43f5e" fill-opacity="0.15" stroke="#f43f5e" stroke-width="1.5" />
+    <text x="400" y="708" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="800" font-size="18" fill="#ffffff" letter-spacing="4">
+      Z3MA IMPOSTER
+    </text>
+  </svg>
