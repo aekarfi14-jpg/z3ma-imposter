@@ -34,7 +34,7 @@ jobs:
 
       - name: Install Capacitor CLI & Android
         run: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/camera
+          npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/camera@6.0.0
           npx cap init "Z3MA IMPOSTER" "com.z3ma.imposter" --web-dir=dist
           npx cap add android
 
