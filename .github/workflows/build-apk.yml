@@ -56,8 +56,9 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
-      - name: Add Camera Permission
+      - name: Add Camera & Microphone Permissions
         run: |
+          sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />|' android/app/src/main/AndroidManifest.xml
           sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />|' android/app/src/main/AndroidManifest.xml
 
       - name: Build Android APK via Gradle
