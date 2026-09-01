@@ -56,6 +56,9 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
+      - name: Add Camera Permission
+        run: |
+          sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />|' android/app/src/main/AndroidManifest.xml
 
       - name: Build Android APK via Gradle
         working-directory: android
