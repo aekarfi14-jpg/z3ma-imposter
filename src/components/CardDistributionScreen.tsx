@@ -205,7 +205,7 @@ export const CardDistributionScreen: React.FC<CardDistributionScreenProps> = ({
           >
             {/* The Main Identity Card */}
             <div
-              className={`w-full rounded-3xl p-6 shadow-2xl border-2 space-y-5 text-center relative overflow-hidden ${
+              className={`w-full rounded-3xl p-5 sm:p-6 shadow-2xl border-2 space-y-5 text-center relative overflow-hidden ${
                 isImposter
                   ? 'bg-gradient-to-b from-slate-900 via-rose-950/60 to-slate-950 border-rose-500/60 shadow-rose-950/80'
                   : isAssistant
@@ -213,8 +213,8 @@ export const CardDistributionScreen: React.FC<CardDistributionScreenProps> = ({
                   : 'bg-gradient-to-b from-slate-900 via-cyan-950/60 to-slate-950 border-cyan-500/60 shadow-cyan-950/80'
               }`}
             >
-              {/* Card Image Banner */}
-              <div className="w-full aspect-[16/9] rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 relative shadow-inner">
+              {/* Card Character Art Showcase (Full-Bleed Art, Perfectly Framed, No Blank Voids) */}
+              <div className="w-full max-w-[280px] mx-auto aspect-[3/4] sm:aspect-[4/5] rounded-2xl overflow-hidden border-2 border-slate-700/80 bg-slate-950 relative shadow-2xl group">
                 <img
                   src={
                     isImposter
@@ -224,21 +224,25 @@ export const CardDistributionScreen: React.FC<CardDistributionScreenProps> = ({
                       : '/assets/Man.jpg'
                   }
                   alt="Role Card"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = isImposter
-                      ? '/assets/Imposter.jpg'
-                      : '/assets/Man.jpg';
+                      ? '/Imposter.jpg'
+                      : isAssistant
+                      ? '/Assistant.jpg'
+                      : '/Man.jpg';
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent flex items-end justify-center p-2">
+
+                {/* Floating Role Title Badge with elegant glassmorphic bottom bar */}
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent flex items-end justify-center p-3.5 z-20">
                   <span
-                    className={`px-3 py-1 rounded-xl text-xs font-black tracking-wider uppercase font-cairo shadow-md ${
+                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-black tracking-wider uppercase font-cairo shadow-xl border backdrop-blur-md ${
                       isImposter
-                        ? 'bg-rose-600 text-white'
+                        ? 'bg-rose-600/95 text-white border-rose-400/60 shadow-rose-950/80'
                         : isAssistant
-                        ? 'bg-amber-500 text-slate-950'
-                        : 'bg-cyan-500 text-slate-950'
+                        ? 'bg-amber-500/95 text-slate-950 border-amber-300/60 shadow-amber-950/80'
+                        : 'bg-cyan-500/95 text-slate-950 border-cyan-300/60 shadow-cyan-950/80'
                     }`}
                   >
                     {isImposter
@@ -259,11 +263,11 @@ export const CardDistributionScreen: React.FC<CardDistributionScreenProps> = ({
                     </p>
                   </div>
 
-                  {/* Category */}
-                  <div className="flex items-center justify-center gap-2 text-xs text-slate-300 font-cairo">
-                    <span className="text-slate-500">{t.categoryLabel}</span>
-                    <span className="font-bold text-cyan-400 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-                      {category.icon} {categoryName}
+                  {/* Imposter Privacy: Category is hidden (Req 13) */}
+                  <div className="flex items-center justify-center gap-2 text-xs text-rose-300/80 font-cairo bg-slate-950/90 py-2 px-3 rounded-xl border border-rose-900/50">
+                    <span>🔒</span>
+                    <span className="font-bold">
+                      {language === 'ar' ? 'الفئة سرية ولا يعرفها إلا الأبرياء!' : 'Category is hidden from Imposters!'}
                     </span>
                   </div>
 

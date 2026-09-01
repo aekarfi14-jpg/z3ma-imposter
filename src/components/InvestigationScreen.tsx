@@ -11,6 +11,7 @@ import {
   AlertCircle,
   Clock,
   Volume2,
+  Music,
 } from 'lucide-react';
 import { Language, VoiceRecording } from '../types';
 import { BANTER_QUOTES } from '../data/quotes';
@@ -23,6 +24,7 @@ interface InvestigationScreenProps {
   durationSeconds: number;
   onGoToVoting: () => void;
   onOpenRules: () => void;
+  onOpenMusicMenu?: () => void;
   onSaveRecording: (recording: VoiceRecording) => void;
 }
 
@@ -32,6 +34,7 @@ export const InvestigationScreen: React.FC<InvestigationScreenProps> = ({
   durationSeconds,
   onGoToVoting,
   onOpenRules,
+  onOpenMusicMenu,
   onSaveRecording,
 }) => {
   const t = translations[language];
@@ -49,6 +52,14 @@ export const InvestigationScreen: React.FC<InvestigationScreenProps> = ({
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const recordingStartTimeRef = useRef<number>(0);
 
+  // Clean up all SFX and sound on unmount
+  useEffect(() => {
+    return () => {
+      soundService.stopAllSFX();
+      soundService.stopMusic();
+    };
+  }, []);
+
   // Timer countdown
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -56,11 +67,15 @@ export const InvestigationScreen: React.FC<InvestigationScreenProps> = ({
     if (!isPaused && timeLeft > 0) {
       interval = setInterval(() => {
         setTimeLeft((prev) => {
+          // Stop background music and trigger 30s left alarm (Req 9)
           if (prev === 31 && !hasPlayed30sWarning) {
+            soundService.stopMusic();
             soundService.playSFX('30-s-left.mp3');
             setHasPlayed30sWarning(true);
           }
           if (prev <= 1) {
+            soundService.stopSFX('30-s-left.mp3');
+            soundService.stopMusic();
             soundService.playSFX('faaah.mp3');
             handleTimerComplete();
             return 0;
@@ -85,6 +100,7 @@ export const InvestigationScreen: React.FC<InvestigationScreenProps> = ({
   }, []);
 
   const handleTimerComplete = () => {
+    soundService.stopSFX('30-s-left.mp3');
     stopRecordingAndSave();
     onGoToVoting();
   };
@@ -98,21 +114,41 @@ export const InvestigationScreen: React.FC<InvestigationScreenProps> = ({
       try {
         soundService.playSFX('piuw.mp3');
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mediaRecorder = new MediaRecorder(stream);
+        
+        // Find best supported mimeType across Chrome, Safari, Android & iOS
+        let selectedMimeType = '';
+        const possibleMimes = [
+          'audio/webm;codecs=opus',
+          'audio/webm',
+          'audio/ogg;codecs=opus',
+          'audio/mp4',
+          'audio/aac',
+        ];
+        for (const mime of possibleMimes) {
+          if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(mime)) {
+            selectedMimeType = mime;
+            break;
+          }
+        }
+
+        const mediaRecorder = selectedMimeType
+          ? new MediaRecorder(stream, { mimeType: selectedMimeType })
+          : new MediaRecorder(stream);
+
         mediaRecorderRef.current = mediaRecorder;
         audioChunksRef.current = [];
         recordingStartTimeRef.current = Date.now();
         setRecordingDuration(0);
 
         mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
+          if (event.data && event.data.size > 0) {
             audioChunksRef.current.push(event.data);
           }
         };
 
         mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-          const audioBlobUrl = URL.createObjectURL(audioBlob);
+          const effectiveType = selectedMimeType || 'audio/webm';
+          const audioBlob = new Blob(audioChunksRef.current, { type: effectiveType });
           const durationSec = Math.max(
             1,
             Math.round((Date.now() - recordingStartTimeRef.current) / 1000)
@@ -123,28 +159,56 @@ export const InvestigationScreen: React.FC<InvestigationScreenProps> = ({
           const dateFormatted = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
             now.getDate()
           )}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
-          const filename = `Round_${roundNumber}_${dateFormatted}.webm`;
+          const extension = effectiveType.includes('mp4') ? 'mp4' : 'webm';
+          const filename = `Round_${roundNumber}_${dateFormatted}.${extension}`;
 
-          const recordingItem: VoiceRecording = {
-            id: 'rec_' + Date.now(),
-            roundNumber,
-            filename,
-            date: now.toLocaleDateString('ar-DZ', {
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
-            timestamp: Date.now(),
-            audioBlobUrl,
-            durationSeconds: durationSec,
+          // Convert to persistent base64 data URL
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const persistentDataUrl = (reader.result as string) || URL.createObjectURL(audioBlob);
+            const recordingItem: VoiceRecording = {
+              id: 'rec_' + Date.now(),
+              roundNumber,
+              filename,
+              date: now.toLocaleDateString('ar-DZ', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
+              timestamp: Date.now(),
+              audioBlobUrl: persistentDataUrl,
+              durationSeconds: durationSec,
+            };
+
+            onSaveRecording(recordingItem);
           };
 
-          onSaveRecording(recordingItem);
+          reader.onerror = () => {
+            // Fallback to object URL
+            const fallbackUrl = URL.createObjectURL(audioBlob);
+            const recordingItem: VoiceRecording = {
+              id: 'rec_' + Date.now(),
+              roundNumber,
+              filename,
+              date: now.toLocaleDateString('ar-DZ', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
+              timestamp: Date.now(),
+              audioBlobUrl: fallbackUrl,
+              durationSeconds: durationSec,
+            };
+            onSaveRecording(recordingItem);
+          };
+
+          reader.readAsDataURL(audioBlob);
           stream.getTracks().forEach((track) => track.stop());
         };
 
-        mediaRecorder.start();
+        mediaRecorder.start(250); // Emit slices every 250ms
         setIsRecording(true);
 
         recordingTimerRef.current = setInterval(() => {
@@ -192,15 +256,28 @@ export const InvestigationScreen: React.FC<InvestigationScreenProps> = ({
           </div>
         </div>
 
-        <button
-          onClick={() => {
-            soundService.playSFX('piuw.mp3');
-            onOpenRules();
-          }}
-          className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1 border border-slate-700 transition-all"
-        >
-          <BookOpen size={16} className="text-amber-400" />
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Music Control / Track Change (Req 9 & 14) */}
+          {onOpenMusicMenu && (
+            <button
+              onClick={onOpenMusicMenu}
+              className="p-2 rounded-xl bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 text-xs font-semibold flex items-center gap-1 border border-indigo-500/40 transition-all active:scale-95"
+              title="Music Menu"
+            >
+              <Music size={16} className="text-indigo-400 animate-pulse" />
+            </button>
+          )}
+
+          <button
+            onClick={() => {
+              soundService.playSFX('piuw.mp3');
+              onOpenRules();
+            }}
+            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1 border border-slate-700 transition-all active:scale-95"
+          >
+            <BookOpen size={16} className="text-amber-400" />
+          </button>
+        </div>
       </div>
 
       {/* Center Giant Timer & Atmosphere */}
@@ -291,6 +368,7 @@ export const InvestigationScreen: React.FC<InvestigationScreenProps> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => {
+            soundService.stopSFX('30-s-left.mp3');
             soundService.playSFX('piuw.mp3');
             stopRecordingAndSave();
             onGoToVoting();

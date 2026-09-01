@@ -32,6 +32,7 @@ interface SetupScreenProps {
   onClearPastAssistant: () => void;
   onUpdatePlayers: (players: Player[]) => void;
   onUpdateSettings: (settings: Partial<GameSettings>) => void;
+  onOpenMusicMenu?: () => void;
   onStartGame: () => void;
 }
 
@@ -77,6 +78,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
   onClearPastAssistant,
   onUpdatePlayers,
   onUpdateSettings,
+  onOpenMusicMenu,
   onStartGame,
 }) => {
   const t = translations[language];
@@ -171,10 +173,30 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
     onUpdateSettings({ enabledCategoryIds: next });
   };
 
+  const [imposterError, setImposterError] = useState<string | null>(null);
+
   const handleSelectTrack = (track: string) => {
-    soundService.playSFX('piuw.mp3');
-    onUpdateSettings({ currentTrack: track });
+    // No SFX for music controls (Req 14)
+    soundService.setMusicMuted(false);
     soundService.playMusic(track);
+    onUpdateSettings({ currentTrack: track });
+  };
+
+  const handleStartRound = () => {
+    if (players.length < 3) {
+      soundService.playSFX('faaah.mp3');
+      return;
+    }
+
+    if (settings.imposterCount >= players.length) {
+      soundService.playSFX('faaah.mp3');
+      setImposterError(t.imposterCountError);
+      setTimeout(() => setImposterError(null), 5000);
+      return;
+    }
+
+    soundService.playSFX('dry-fart.mp3');
+    onStartGame();
   };
 
   return (
@@ -597,16 +619,75 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
 
       {/* Audio & Music Settings */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
-        <h4 className="font-bold text-slate-100 font-cairo text-base flex items-center gap-2">
-          <Volume2 size={18} className="text-cyan-400" />
-          <span>{t.audioSettings}</span>
-        </h4>
+        <div className="flex items-center justify-between">
+          <h4 className="font-bold text-slate-100 font-cairo text-base flex items-center gap-2">
+            <Volume2 size={18} className="text-cyan-400" />
+            <span>{t.audioSettings || (language === 'ar' ? 'إعدادات الصوت والموسيقى' : 'Audio & Music Settings')}</span>
+          </h4>
+          {onOpenMusicMenu && (
+            <button
+              type="button"
+              onClick={onOpenMusicMenu}
+              className="px-3 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 text-xs font-bold font-cairo flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
+            >
+              <Music size={14} className="animate-pulse" />
+              <span>{language === 'ar' ? 'القائمة المتقدمة' : 'Full Audio Menu'}</span>
+            </button>
+          )}
+        </div>
 
+        {/* Volume Sliders inside SetupScreen */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Music Volume */}
+          <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-300 font-cairo">
+              <span className="text-cyan-300">🎵 {language === 'ar' ? 'مستوى الموسيقى' : 'Music Volume'}</span>
+              <span className="font-mono text-cyan-400">{Math.round(settings.musicVolume * 100)}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.02"
+              value={settings.musicVolume}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                soundService.setMusicVolume(val);
+                if (val > 0) soundService.setMusicMuted(false);
+                onUpdateSettings({ musicVolume: val });
+              }}
+              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+            />
+          </div>
+
+          {/* SFX Volume */}
+          <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-300 font-cairo">
+              <span className="text-amber-300">🔔 {language === 'ar' ? 'المؤثرات الصوتية' : 'Sound Effects'}</span>
+              <span className="font-mono text-amber-400">{Math.round(settings.sfxVolume * 100)}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.02"
+              value={settings.sfxVolume}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                soundService.setSFXVolume(val);
+                onUpdateSettings({ sfxVolume: val });
+              }}
+              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
+            />
+          </div>
+        </div>
+
+        {/* Tracks selector */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {[
-            { id: 'Msic00.mp3', label: t.track1 },
-            { id: 'msic01.mp3', label: t.track2 },
-            { id: 'msic02.mp3', label: t.track3 },
+            { id: 'Msic00.mp3', label: t.track1 || (language === 'ar' ? 'الموسيقى 01' : 'Track 1') },
+            { id: 'msic01.mp3', label: t.track2 || (language === 'ar' ? 'الموسيقى 02' : 'Track 2') },
+            { id: 'msic02.mp3', label: t.track3 || (language === 'ar' ? 'الموسيقى 03' : 'Track 3') },
           ].map((trk) => {
             const isSelected = settings.currentTrack === trk.id;
             return (
@@ -631,19 +712,39 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
         </div>
       </div>
 
+      {/* Imposter Validation Error Alert (Req 5) */}
+      <AnimatePresence>
+        {imposterError && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            className="p-4 rounded-2xl bg-rose-950/90 border-2 border-rose-500/80 shadow-2xl text-rose-100 flex items-center gap-3 font-cairo"
+          >
+            <AlertTriangle className="text-rose-400 shrink-0" size={24} />
+            <div className="flex-1 text-xs sm:text-sm font-bold leading-relaxed break-words">
+              {imposterError}
+            </div>
+            <button
+              onClick={() => setImposterError(null)}
+              className="p-1 rounded-lg bg-rose-900/60 hover:bg-rose-800 text-rose-200"
+            >
+              <X size={16} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Start Button */}
       <motion.button
         id="setup-start-game-btn"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.97 }}
-        onClick={() => {
-          soundService.playSFX('dry-fart.mp3');
-          onStartGame();
-        }}
+        onClick={handleStartRound}
         className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-cairo font-black text-lg shadow-xl shadow-cyan-500/30 border border-cyan-300/40 flex items-center justify-center gap-3 transition-all"
       >
-        <Play size={22} className="fill-current" />
-        <span>{t.startRoundButton}</span>
+        <Play size={22} className="fill-current shrink-0" />
+        <span className="truncate">{t.startRoundButton}</span>
       </motion.button>
     </div>
   );

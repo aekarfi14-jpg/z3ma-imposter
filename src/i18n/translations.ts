@@ -9,10 +9,13 @@ export const translations = {
     // Home Screen
     startGame: '🎮 ابدأ اللعبة',
     quickRules: '📜 القوانين',
-    album: '📸 الألبوم والتسجيلات',
+    album: '📸 الألبوم',
     library: '📚 المكتبة',
     settings: '⚙️ الإعدادات',
     creatorCredit: 'صُممت بعبقرية يونس الشيكور',
+    musicMenuTitle: '🎵 مشغل الموسيقى',
+    musicVolume: 'مستوى صوت الموسيقى',
+    chooseTrack: 'اختر المقطع الموسيقي',
     
     // Setup Screen
     setupTitle: '⚙️ إعدادات الجولة',
@@ -23,6 +26,7 @@ export const translations = {
     maxPlayersWarning: 'الحد الأقصى 50 لاعبًا',
     imposterCount: '😈 عدد الـ Imposters',
     imposterRule: 'يجب أن يكون عدد الـ Imposters أقل دائمًا من اللاعبين (1 إلى 4)',
+    imposterCountError: 'راك باغي القعدة كاملة تولي Imposters؟ شكون بقا بريء يتفرج فيكم؟ 😂 هبّط عدد الـ Imposters قبل ما تبدا!',
     investigationTime: '⏱️ مدة الاستجواب',
     minutes: 'دقائق',
     minute: 'دقيقة',
@@ -130,7 +134,7 @@ export const translations = {
     backToHome: '🏠 القائمة الرئيسية',
     
     // Album & Records
-    albumTitle: '📸 الألبوم والتسجيلات',
+    albumTitle: '📸 الألبوم',
     photosTab: '📸 الصور التذكارية',
     recordingsTab: '🎙️ التسجيلات الصوتية',
     historyTab: '📜 سجل الجولات',
@@ -153,6 +157,8 @@ export const translations = {
     rule4Title: '4. التخمين الأخير',
     rule4Body: 'إذا تم كشف جميع الـ Imposters، يحصل آخر Imposter على فرصة أخيرة لتخمين الكلمة شفهياً. إذا أصاب يفوز!',
     closeRules: 'فهمت القوانين ✅',
+    doNotPressButton: '⚠️ لا تضغط على الزر',
+    doNotPressAlert: 'قلنا لك لا تضغط عليه! 😂 فضولكم فضيحة!',
     
     // Easter Egg
     easterEggTitle: '👑 عبقرية يونس الشيكور',
@@ -168,10 +174,13 @@ export const translations = {
     // Home Screen
     startGame: '🎮 Start Game',
     quickRules: '📜 Rules',
-    album: '📸 Album & Audio',
+    album: '📸 Album',
     library: '📚 Library',
     settings: '⚙️ Settings',
     creatorCredit: 'Crafted by Younes Le Chikor',
+    musicMenuTitle: '🎵 Music Player',
+    musicVolume: 'Music Volume',
+    chooseTrack: 'Select Track',
     
     // Setup Screen
     setupTitle: '⚙️ Round Setup',
@@ -182,6 +191,7 @@ export const translations = {
     maxPlayersWarning: 'Maximum 50 players',
     imposterCount: '😈 Number of Imposters',
     imposterRule: 'Imposters must be fewer than total players (1 to 4)',
+    imposterCountError: 'You want all players to be Imposters? Who is left as innocent? 😂 Decrease imposter count!',
     investigationTime: '⏱️ Investigation Time',
     minutes: 'Minutes',
     minute: 'Minute',
@@ -289,7 +299,7 @@ export const translations = {
     backToHome: '🏠 Main Menu',
     
     // Album & Records
-    albumTitle: '📸 Album & Recordings',
+    albumTitle: '📸 Album',
     photosTab: '📸 Photos',
     recordingsTab: '🎙️ Voice Notes',
     historyTab: '📜 Round Logs',
@@ -312,6 +322,8 @@ export const translations = {
     rule4Title: '4. Final Guess',
     rule4Body: 'If all Imposters are caught, the last Imposter gets one verbal guess to name the secret word and steal the victory!',
     closeRules: 'Got It ✅',
+    doNotPressButton: '⚠️ DO NOT PRESS THIS BUTTON',
+    doNotPressAlert: 'We told you not to press it! 😂 Curiosity got you!',
     
     // Easter Egg
     easterEggTitle: '👑 Younes Le Chikor Easter Egg',

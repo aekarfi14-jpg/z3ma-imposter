@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { BookOpen, X, CheckCircle2, ShieldAlert, Sparkles, HelpCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { BookOpen, X, CheckCircle2, ShieldAlert, Sparkles, HelpCircle, AlertTriangle, Flame } from 'lucide-react';
 import { Language } from '../types';
 import { translations } from '../i18n/translations';
 import { soundService } from '../services/soundService';
@@ -12,6 +12,13 @@ interface RulesModalProps {
 
 export const RulesModal: React.FC<RulesModalProps> = ({ language, onClose }) => {
   const t = translations[language];
+  const [showWarningAlert, setShowWarningAlert] = useState(false);
+
+  const handleDoNotPressClick = () => {
+    // Play anime girl voice specifically on easter egg button (Req 3)
+    soundService.playSFX('anime-girl-voice.mp3');
+    setShowWarningAlert(true);
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
@@ -48,7 +55,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ language, onClose }) => 
               <CheckCircle2 size={16} />
               <span>{t.rule1Title}</span>
             </h4>
-            <p className="text-slate-300 leading-relaxed">
+            <p className="text-slate-300 leading-relaxed break-words">
               {t.rule1Body}
             </p>
           </div>
@@ -59,7 +66,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ language, onClose }) => 
               <CheckCircle2 size={16} />
               <span>{t.rule2Title}</span>
             </h4>
-            <p className="text-slate-300 leading-relaxed">
+            <p className="text-slate-300 leading-relaxed break-words">
               {t.rule2Body}
             </p>
           </div>
@@ -70,7 +77,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ language, onClose }) => 
               <CheckCircle2 size={16} />
               <span>{t.rule3Title}</span>
             </h4>
-            <p className="text-slate-300 leading-relaxed">
+            <p className="text-slate-300 leading-relaxed break-words">
               {t.rule3Body}
             </p>
           </div>
@@ -81,10 +88,36 @@ export const RulesModal: React.FC<RulesModalProps> = ({ language, onClose }) => 
               <CheckCircle2 size={16} />
               <span>{t.rule4Title}</span>
             </h4>
-            <p className="text-slate-300 leading-relaxed">
+            <p className="text-slate-300 leading-relaxed break-words">
               {t.rule4Body}
             </p>
           </div>
+        </div>
+
+        {/* Easter Egg Warning Button (Req 3) */}
+        <div className="pt-1 space-y-2">
+          <button
+            type="button"
+            onClick={handleDoNotPressClick}
+            className="w-full py-3 px-4 rounded-2xl bg-rose-950/60 hover:bg-rose-900/80 border-2 border-rose-500/60 text-rose-200 font-cairo font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-rose-950/50 transition-all active:scale-95 animate-pulse"
+          >
+            <AlertTriangle size={18} className="text-rose-400" />
+            <span>{t.doNotPressButton}</span>
+            <Flame size={16} className="text-amber-400" />
+          </button>
+
+          <AnimatePresence>
+            {showWarningAlert && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="p-3 rounded-xl bg-amber-950/80 border border-amber-500/50 text-amber-200 text-xs font-cairo font-bold text-center"
+              >
+                {t.doNotPressAlert}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Close Button */}

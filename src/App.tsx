@@ -29,6 +29,7 @@ import { AlbumScreen } from './components/AlbumScreen';
 import { RulesModal } from './components/RulesModal';
 import { NarcissisticModal } from './components/NarcissisticModal';
 import { LibraryModal } from './components/LibraryModal';
+import { MusicMenuModal } from './components/MusicMenuModal';
 
 export const App: React.FC = () => {
   // Global persistent states
@@ -60,6 +61,7 @@ export const App: React.FC = () => {
   const [showRulesModal, setShowRulesModal] = useState<boolean>(false);
   const [showEasterEggModal, setShowEasterEggModal] = useState<boolean>(false);
   const [showLibraryModal, setShowLibraryModal] = useState<boolean>(false);
+  const [showMusicModal, setShowMusicModal] = useState<boolean>(false);
   const [customWords, setCustomWords] = useState<SecretWordItem[]>(() =>
     storageService.getCustomWords()
   );
@@ -91,6 +93,14 @@ export const App: React.FC = () => {
   const handleToggleMusic = () => {
     const muted = soundService.toggleMusicMute();
     setIsMusicMuted(muted);
+  };
+
+  const handleSelectTrack = (track: string) => {
+    soundService.setMusicMuted(false);
+    setIsMusicMuted(false);
+    soundService.playMusic(track);
+    const updated = storageService.saveSettings({ currentTrack: track });
+    setSettings(updated);
   };
 
   // Start new round from Setup
@@ -175,27 +185,42 @@ export const App: React.FC = () => {
     setRecordings(storageService.getRecordings());
   };
 
+  const handleGoToVoting = () => {
+    // Music and countdown audio must stop automatically when entering voting
+    soundService.stopAllSFX();
+    soundService.stopMusic();
+    setGamePhase('VOTING');
+  };
+
   const handleConfirmElimination = (suspect: Player) => {
+    soundService.stopAllSFX();
+    soundService.stopMusic();
     setCurrentEliminatedSuspect(suspect);
     setActiveSuspects((prev) => prev.filter((p) => p.id !== suspect.id));
     setGamePhase('REVEAL_ELIMINATION');
   };
 
   const handleImpostersWin = () => {
+    soundService.stopAllSFX();
+    soundService.stopMusic();
     setWinner('IMPOSTERS');
     recordRoundHistory('IMPOSTERS', false);
     setGamePhase('GAME_OVER');
   };
 
   const handleNextVote = () => {
+    soundService.stopAllSFX();
     setGamePhase('VOTING');
   };
 
   const handleProceedToFinalGuess = () => {
+    soundService.stopAllSFX();
     setGamePhase('FINAL_GUESS');
   };
 
   const handleFinalGuessResult = (isCorrect: boolean) => {
+    soundService.stopAllSFX();
+    soundService.stopMusic();
     const finalWinner: 'IMPOSTERS' | 'CREW' = isCorrect ? 'IMPOSTERS' : 'CREW';
     setWinner(finalWinner);
     recordRoundHistory(finalWinner, isCorrect);
@@ -243,6 +268,7 @@ export const App: React.FC = () => {
   };
 
   const handlePlayAgain = () => {
+    soundService.stopMusic();
     const nextRound = storageService.incrementRoundCount();
     setRoundNumber(nextRound);
     setAssistantPlayer(null);
@@ -275,6 +301,7 @@ export const App: React.FC = () => {
         onOpenRules={() => setShowRulesModal(true)}
         isMusicMuted={isMusicMuted}
         onToggleMusic={handleToggleMusic}
+        onOpenMusicMenu={() => setShowMusicModal(true)}
         roundNumber={gamePhase !== 'HOME' ? roundNumber : undefined}
         showBackHome={gamePhase !== 'HOME'}
         onBackHome={handleBackHome}
@@ -291,6 +318,7 @@ export const App: React.FC = () => {
             onOpenRules={() => setShowRulesModal(true)}
             onOpenLibrary={() => setShowLibraryModal(true)}
             onOpenEasterEgg={() => setShowEasterEggModal(true)}
+            onOpenMusicMenu={() => setShowMusicModal(true)}
           />
         )}
 
@@ -306,6 +334,7 @@ export const App: React.FC = () => {
             }}
             onUpdatePlayers={handleUpdatePlayers}
             onUpdateSettings={handleUpdateSettings}
+            onOpenMusicMenu={() => setShowMusicModal(true)}
             onStartGame={handleStartRound}
           />
         )}
@@ -349,8 +378,9 @@ export const App: React.FC = () => {
             language={settings.language}
             roundNumber={roundNumber}
             durationSeconds={settings.durationSeconds}
-            onGoToVoting={() => setGamePhase('VOTING')}
+            onGoToVoting={handleGoToVoting}
             onOpenRules={() => setShowRulesModal(true)}
+            onOpenMusicMenu={() => setShowMusicModal(true)}
             onSaveRecording={handleSaveRecording}
           />
         )}
@@ -451,6 +481,22 @@ export const App: React.FC = () => {
             return result;
           }}
           onClose={() => setShowLibraryModal(false)}
+        />
+      )}
+
+      {/* Music Menu Modal (Req 2 & 9) */}
+      {showMusicModal && (
+        <MusicMenuModal
+          language={settings.language}
+          currentTrack={settings.currentTrack}
+          musicVolume={settings.musicVolume}
+          sfxVolume={settings.sfxVolume}
+          isMuted={isMusicMuted}
+          onSelectTrack={handleSelectTrack}
+          onChangeMusicVolume={(vol) => handleUpdateSettings({ musicVolume: vol })}
+          onChangeSfxVolume={(vol) => handleUpdateSettings({ sfxVolume: vol })}
+          onToggleMute={handleToggleMusic}
+          onClose={() => setShowMusicModal(false)}
         />
       )}
     </div>

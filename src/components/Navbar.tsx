@@ -10,6 +10,7 @@ interface NavbarProps {
   onOpenRules: () => void;
   isMusicMuted: boolean;
   onToggleMusic: () => void;
+  onOpenMusicMenu?: () => void;
   roundNumber?: number;
   showBackHome?: boolean;
   onBackHome?: () => void;
@@ -21,6 +22,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenRules,
   isMusicMuted,
   onToggleMusic,
+  onOpenMusicMenu,
   roundNumber,
   showBackHome,
   onBackHome,
@@ -28,7 +30,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const t = translations[language];
 
   const handleLanguageToggle = () => {
-    soundService.playSFX('anime-girl-voice.mp3');
+    // Custom harmonic AI-generated chime for language switch (Req 4)
+    soundService.playLanguageSwitchSound();
     onLanguageChange(language === 'ar' ? 'en' : 'ar');
   };
 
@@ -36,7 +39,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="w-full bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-40 px-3 py-2.5 transition-all">
       <div className="max-w-4xl mx-auto flex items-center justify-between gap-2">
         {/* Left Side: Brand Logo & Title */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 min-w-0">
           {showBackHome && onBackHome ? (
             <button
               id="nav-back-button"
@@ -44,13 +47,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 soundService.playSFX('piuw.mp3');
                 onBackHome();
               }}
-              className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 transition-all border border-slate-700"
+              className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 transition-all border border-slate-700 flex-shrink-0"
               title="Home"
             >
               <span className="text-sm font-bold px-1.5">🏠</span>
             </button>
           ) : (
-            <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md shadow-cyan-500/20 border border-cyan-500/40 bg-slate-950 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md shadow-cyan-500/20 border border-cyan-500/40 bg-slate-950 flex items-center justify-center flex-shrink-0">
               <img
                 src="/assets/Icon.jpg"
                 alt="Logo"
@@ -62,38 +65,41 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           )}
 
-          <div>
+          <div className="min-w-0 truncate">
             <div className="flex items-center gap-1.5">
-              <h1 className="text-base font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 font-outfit">
+              <h1 className="text-sm sm:text-base font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 font-outfit truncate">
                 Z3MA IMPOSTER
               </h1>
               {roundNumber !== undefined && (
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 whitespace-nowrap">
                   {t.round} #{roundNumber}
                 </span>
               )}
             </div>
-            <p className="text-[10px] text-slate-400 hidden sm:block">
+            <p className="text-[10px] text-slate-400 hidden sm:block truncate">
               {t.tagline} • <span className="text-emerald-400 font-semibold">{t.offlineBadge}</span>
             </p>
           </div>
         </div>
 
         {/* Right Side: Quick Action Buttons */}
-        <div className="flex items-center gap-1.5">
-          {/* Music Toggle */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* Music Menu / Toggle - No SFX on music controls (Req 14) */}
           <button
             id="nav-music-toggle"
             onClick={() => {
-              soundService.playSFX('piuw.mp3');
-              onToggleMusic();
+              if (onOpenMusicMenu) {
+                onOpenMusicMenu();
+              } else {
+                onToggleMusic();
+              }
             }}
             className={`p-2 rounded-xl border transition-all active:scale-95 flex items-center justify-center ${
               isMusicMuted
                 ? 'bg-slate-800/80 border-slate-700 text-slate-500'
                 : 'bg-indigo-950/60 border-indigo-500/40 text-indigo-300 shadow-sm shadow-indigo-500/20'
             }`}
-            title="Music"
+            title="Music Menu"
           >
             {isMusicMuted ? <VolumeX size={17} /> : <Music size={17} className="animate-pulse" />}
           </button>

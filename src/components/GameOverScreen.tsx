@@ -1,21 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import {
   RotateCcw,
   Home,
   Trophy,
-  Skull,
   ShieldCheck,
-  Sparkles,
+  Skull,
   HelpCircle,
-  AlertTriangle,
+  Volume2,
 } from 'lucide-react';
-import { CategoryItem, Language, Player, SecretWordItem } from '../types';
-import { getAvatarById } from '../data/avatars';
+import { Language, Player, SecretWordItem, CategoryItem } from '../types';
 import { translations } from '../i18n/translations';
+import {
+  ASSISTANT_EXPOSED_MESSAGES_AR,
+  ASSISTANT_EXPOSED_MESSAGES_EN,
+} from '../data/quotes';
+import { getAvatarById } from '../data/avatars';
 import { soundService } from '../services/soundService';
-import { ASSISTANT_EXPOSED_MESSAGES_AR, ASSISTANT_EXPOSED_MESSAGES_EN } from '../data/quotes';
 
 interface GameOverScreenProps {
   language: Language;
@@ -50,8 +52,12 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
   const categoryName = language === 'ar' ? category.nameAr : category.nameEn;
   const wordDisplay = language === 'ar' ? secretWord.word : secretWord.wordEn;
 
-  // Fire confetti on load
+  // Stop background music and trigger win sound immediately
   useEffect(() => {
+    soundService.unlockAudio();
+    soundService.stopMusic();
+    soundService.playSFX('du-bist-gut-genug.mp3');
+
     try {
       confetti({
         particleCount: isImpostersWinner ? 80 : 120,
@@ -96,7 +102,7 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
         className="w-full bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-4"
       >
         {/* Banner Art */}
-        <div className="w-full aspect-[16/9] relative bg-slate-950">
+        <div className="w-full aspect-[16/9] relative bg-slate-950 overflow-hidden flex items-center justify-center border-b border-slate-800">
           <img
             src={
               isImpostersWinner
@@ -104,14 +110,17 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
                 : '/assets/Imposter_lose.png'
             }
             alt="Victory Screen"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-center drop-shadow-2xl"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = isImpostersWinner
-                ? '/assets/Victory_imposters.png'
-                : '/assets/Imposter_lose.png';
+              const target = e.target as HTMLImageElement;
+              if (isImpostersWinner) {
+                target.src = '/Victory_imposters.png';
+              } else {
+                target.src = '/Imposter_lose.png';
+              }
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent flex flex-col justify-end p-4">
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent flex flex-col justify-end p-4 sm:p-5 z-20">
             <h2 className="text-2xl sm:text-3xl font-black text-white font-cairo drop-shadow-lg">
               {isImpostersWinner ? t.impostersVictorious : t.crewVictorious}
             </h2>
@@ -123,6 +132,20 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
 
         {/* Round Summary Details */}
         <div className="p-5 space-y-4">
+          {/* Audio Celebration / Replay Bar */}
+          <button
+            type="button"
+            onClick={() => soundService.playSFX('du-bist-gut-genug.mp3')}
+            className="w-full py-2.5 px-3 rounded-2xl bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/40 text-cyan-200 text-xs font-cairo font-bold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md"
+          >
+            <Volume2 size={16} className="text-cyan-400 animate-pulse" />
+            <span>
+              {language === 'ar'
+                ? '🔊 إعادة تشغيل صوت الفوز (du bist gut genug)'
+                : '🔊 Replay Victory Voice (du bist gut genug)'}
+            </span>
+          </button>
+
           {/* Secret Word & Category */}
           <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
             <div>

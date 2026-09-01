@@ -102,22 +102,23 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
   return (
     <div className="w-full max-w-lg mx-auto p-4 flex flex-col items-center justify-between min-h-[calc(100vh-6rem)] space-y-6">
       {/* Visual Header with Voting.jpg */}
-      <div className="w-full relative rounded-3xl overflow-hidden border-2 border-slate-800 bg-slate-900 shadow-xl">
-        <div className="w-full h-32 relative">
+      <div className="w-full relative rounded-3xl overflow-hidden border border-slate-800 bg-slate-950 shadow-2xl">
+        <div className="w-full aspect-[16/9] sm:aspect-[21/9] relative flex items-center justify-center overflow-hidden bg-slate-950">
           <img
             src="/assets/Voting.jpg"
             alt="Voting Room"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-center"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = '/assets/Voting.jpg';
+              (e.target as HTMLImageElement).src = '/Voting.jpg';
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent flex flex-col justify-end p-4">
+          {/* Gradient Vignette & Title Overlay */}
+          <div className="absolute inset-0 z-20 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent flex flex-col justify-end p-4 sm:p-5">
             <div className="flex items-center gap-1.5 text-xs text-rose-400 font-bold uppercase font-outfit">
-              <ShieldAlert size={14} />
+              <ShieldAlert size={15} />
               <span>{t.votingTitle}</span>
             </div>
-            <h3 className="text-xl sm:text-2xl font-black text-white font-cairo">
+            <h3 className="text-xl sm:text-2xl font-black text-white font-cairo drop-shadow-md">
               {language === 'ar' ? 'صندوق طرد المشكوك فيه' : 'Elimination Ballot Box'}
             </h3>
           </div>

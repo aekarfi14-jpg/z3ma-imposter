@@ -29,12 +29,12 @@ export const FinalGuessScreen: React.FC<FinalGuessScreenProps> = ({
   const categoryName = language === 'ar' ? category.nameAr : category.nameEn;
 
   const handleCorrect = () => {
-    soundService.playSFX('suuuuui.mp3');
+    soundService.playSFX('piuw.mp3');
     onFinalGuessResult(true);
   };
 
   const handleWrong = () => {
-    soundService.playSFX('yyy_ahqVbsA.mp3');
+    soundService.playSFX('piuw.mp3');
     onFinalGuessResult(false);
   };
 

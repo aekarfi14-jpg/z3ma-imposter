@@ -52,27 +52,68 @@ export const AlbumScreen: React.FC<AlbumScreenProps> = ({
   const [activeAudioElement, setActiveAudioElement] = useState<HTMLAudioElement | null>(null);
   const [selectedPhotoForLightbox, setSelectedPhotoForLightbox] = useState<CommemorativePhoto | null>(null);
 
+  // Stop audio on unmount or tab switch
+  React.useEffect(() => {
+    return () => {
+      if (activeAudioElement) {
+        activeAudioElement.pause();
+      }
+    };
+  }, [activeAudioElement]);
+
   const handleTogglePlayAudio = (rec: VoiceRecording) => {
-    soundService.playSFX('piuw.mp3');
+    soundService.unlockAudio();
 
     if (playingRecordingId === rec.id) {
       if (activeAudioElement) {
         activeAudioElement.pause();
+        activeAudioElement.currentTime = 0;
       }
       setPlayingRecordingId(null);
       setActiveAudioElement(null);
     } else {
       if (activeAudioElement) {
         activeAudioElement.pause();
+        activeAudioElement.currentTime = 0;
       }
-      const audio = new Audio(rec.audioBlobUrl);
-      audio.onended = () => {
+
+      try {
+        const audio = new Audio(rec.audioBlobUrl);
+        const vol = soundService.getSFXVolume();
+        audio.volume = vol > 0 ? vol : 1.0;
+
+        audio.onended = () => {
+          setPlayingRecordingId(null);
+          setActiveAudioElement(null);
+        };
+
+        audio.onerror = (e) => {
+          console.warn('Playback error for recording', e);
+          setPlayingRecordingId(null);
+          setActiveAudioElement(null);
+        };
+
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setActiveAudioElement(audio);
+              setPlayingRecordingId(rec.id);
+            })
+            .catch((err) => {
+              console.warn('Playback error:', err);
+              setPlayingRecordingId(null);
+              setActiveAudioElement(null);
+            });
+        } else {
+          setActiveAudioElement(audio);
+          setPlayingRecordingId(rec.id);
+        }
+      } catch (err) {
+        console.warn('Could not initialize audio player', err);
         setPlayingRecordingId(null);
         setActiveAudioElement(null);
-      };
-      audio.play().catch(() => {});
-      setActiveAudioElement(audio);
-      setPlayingRecordingId(rec.id);
+      }
     }
   };
 
