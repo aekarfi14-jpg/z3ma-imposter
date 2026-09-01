@@ -37,7 +37,25 @@ jobs:
           npm install @capacitor/core @capacitor/cli @capacitor/android
           npx cap init "Z3MA IMPOSTER" "com.z3ma.imposter" --web-dir=dist
           npx cap add android
-          npx cap sync android
+
+      - name: Fix Kotlin version conflict
+        run: |
+          cat >> android/build.gradle << 'EOF'
+
+          allprojects {
+              configurations.all {
+                  resolutionStrategy {
+                      force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.24'
+                      force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.24'
+                      force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24'
+                      force 'org.jetbrains.kotlin:kotlin-stdlib-common:1.9.24'
+                  }
+              }
+          }
+          EOF
+
+      - name: Sync Capacitor
+        run: npx cap sync android
 
       - name: Build Android APK via Gradle
         working-directory: android
