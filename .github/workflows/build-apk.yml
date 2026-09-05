@@ -79,98 +79,19 @@ jobs:
 
           RES="android/app/src/main/res"
 
+          echo "Removing all Capacitor generated launcher icons..."
+
+          find "$RES" -type f \
+            -name "ic_launcher.png" -o \
+            -name "ic_launcher_round.png" -o \
+            -name "ic_launcher.xml" -o \
+            -name "ic_launcher_round.xml" \
+           -delete
+
           mkdir -p "$RES/mipmap-mdpi"
           mkdir -p "$RES/mipmap-hdpi"
           mkdir -p "$RES/mipmap-xhdpi"
           mkdir -p "$RES/mipmap-xxhdpi"
           mkdir -p "$RES/mipmap-xxxhdpi"
-          mkdir -p "$RES/drawable-nodpi"
-          mkdir -p "$RES/mipmap-anydpi-v26"
 
-          convert "$ICON_SOURCE" \
-            -resize 512x512^ \
-            -gravity center \
-            -extent 512x512 \
-            "$RES/drawable-nodpi/ic_launcher_foreground.png"
-
-          cp "$RES/drawable-nodpi/ic_launcher_foreground.png" \
-            "$RES/mipmap-mdpi/ic_launcher.png"
-
-          cp "$RES/drawable-nodpi/ic_launcher_foreground.png" \
-            "$RES/mipmap-hdpi/ic_launcher.png"
-
-          cp "$RES/drawable-nodpi/ic_launcher_foreground.png" \
-            "$RES/mipmap-xhdpi/ic_launcher.png"
-
-          cp "$RES/drawable-nodpi/ic_launcher_foreground.png" \
-            "$RES/mipmap-xxhdpi/ic_launcher.png"
-
-          cp "$RES/drawable-nodpi/ic_launcher_foreground.png" \
-            "$RES/mipmap-xxxhdpi/ic_launcher.png"
-
-          cp "$RES/drawable-nodpi/ic_launcher_foreground.png" \
-            "$RES/mipmap-mdpi/ic_launcher_round.png"
-
-          cp "$RES/drawable-nodpi/ic_launcher_foreground.png" \
-            "$RES/mipmap-hdpi/ic_launcher_round.png"
-
-          cp "$RES/drawable-nodpi/ic_launcher_foreground.png" \
-            "$RES/mipmap-xhdpi/ic_launcher_round.png"
-
-          cp "$RES/drawable-nodpi/ic_launcher_foreground.png" \
-            "$RES/mipmap-xxhdpi/ic_launcher_round.png"
-
-          cp "$RES/drawable-nodpi/ic_launcher_foreground.png" \
-            "$RES/mipmap-xxxhdpi/ic_launcher_round.png"
-
-          cat > "$RES/mipmap-anydpi-v26/ic_launcher.xml" <<'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-              <background android:drawable="@color/ic_launcher_background" />
-              <foreground android:drawable="@drawable/ic_launcher_foreground" />
-          </adaptive-icon>
-          EOF
-
-          cat > "$RES/mipmap-anydpi-v26/ic_launcher_round.xml" <<'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-              <background android:drawable="@color/ic_launcher_background" />
-              <foreground android:drawable="@drawable/ic_launcher_foreground" />
-          </adaptive-icon>
-          EOF
-
-          MANIFEST="android/app/src/main/AndroidManifest.xml"
-
-          sed -i \
-            's#android:icon="@[^"]*"#android:icon="@mipmap/ic_launcher"#g' \
-            "$MANIFEST"
-
-          sed -i \
-            's#android:roundIcon="@[^"]*"#android:roundIcon="@mipmap/ic_launcher_round"#g' \
-            "$MANIFEST"
-
-          if ! grep -q 'android:icon="@mipmap/ic_launcher"' "$MANIFEST"; then
-            sed -i \
-              's#<application#<application android:icon="@mipmap/ic_launcher"#' \
-              "$MANIFEST"
-          fi
-
-          if ! grep -q 'android:roundIcon="@mipmap/ic_launcher_round"' "$MANIFEST"; then
-            sed -i \
-              's#<application#<application android:roundIcon="@mipmap/ic_launcher_round"#' \
-              "$MANIFEST"
-          fi
-
-          echo "Z3MA Imposter launcher icon configured successfully."
-
-      - name: Build Android APK via Gradle
-        working-directory: android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Z3MA-IMPOSTER-Debug-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          echo "Creating launcher icon from public
