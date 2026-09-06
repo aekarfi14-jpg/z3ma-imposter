@@ -81,12 +81,12 @@ jobs:
 
           echo "Removing all Capacitor generated launcher icons..."
 
-          find "$RES" -type f \
-            -name "ic_launcher.png" -o \
-            -name "ic_launcher_round.png" -o \
-            -name "ic_launcher.xml" -o \
-            -name "ic_launcher_round.xml" \
-           -delete
+          find "$RES" -type f \( \
+          - name "ic_launcher.png" -o \
+          - name "ic_launcher_round.png" -o \
+          - name "ic_launcher.xml" -o \
+          - name "ic_launcher_round.xml" \
+          \) -delete
 
           mkdir -p "$RES/mipmap-mdpi"
           mkdir -p "$RES/mipmap-hdpi"
