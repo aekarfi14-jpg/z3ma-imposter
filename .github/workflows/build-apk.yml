@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build Debug APK
+    name: Build Release APK
     runs-on: ubuntu-latest
 
     steps:
@@ -25,6 +25,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '21'
+          cache: 'gradle'
 
       - name: Install Dependencies
         run: npm ci
@@ -60,6 +61,53 @@ jobs:
         run: |
           sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />|' android/app/src/main/AndroidManifest.xml
 
+      - name: Set Z3MA version
+        run: |
+          sed -i 's/versionCode [0-9][0-9]*/versionCode 2/' android/app/build.gradle
+          sed -i 's/versionName "[^"]*"/versionName "1.0.1"/' android/app/build.gradle
+
+      - name: Prepare Release Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/z3ma-release.keystore
+          test -s android/z3ma-release.keystore
+
+      - name: Configure Release Signing
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("android/app/build.gradle")
+          text = path.read_text()
+
+          signing = '''
+              signingConfigs {
+                  release {
+                      storeFile file("../z3ma-release.keystore")
+                      storePassword System.getenv("KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("KEY_ALIAS")
+                      keyPassword System.getenv("KEY_PASSWORD")
+                  }
+              }
+          '''
+
+          if "signingConfigs {" not in text:
+              text = text.replace("    buildTypes {", signing + "\n    buildTypes {")
+
+          text = text.replace(
+              "release {\n",
+              "release {\n            signingConfig signingConfigs.release\n",
+              1
+          )
+
+          path.write_text(text)
+          PY
+
       - name: Install ImageMagick
         run: |
           sudo apt-get update
@@ -69,24 +117,38 @@ jobs:
         run: |
           set -e
           ICON_SOURCE="public/Icon.jpg"
+
           if [ ! -f "$ICON_SOURCE" ]; then
             echo "ERROR: Launcher icon not found: $ICON_SOURCE"
             exit 1
           fi
+
           RES="android/app/src/main/res"
-          echo "Removing all Capacitor generated launcher icons..."
-          find "$RES" -type f \( -name "ic_launcher.png" -o -name "ic_launcher_round.png" -o -name "ic_launcher.xml" -o -name "ic_launcher_round.xml" \) -delete
-          mkdir -p "$RES/mipmap-mdpi"
-          mkdir -p "$RES/mipmap-hdpi"
-          mkdir -p "$RES/mipmap-xhdpi"
-          mkdir -p "$RES/mipmap-xxhdpi"
-          mkdir -p "$RES/mipmap-xxxhdpi"
-          echo "Creating launcher icon from $ICON_SOURCE..."
+
+          find "$RES" -type f \( \
+            -name "ic_launcher.png" -o \
+            -name "ic_launcher_round.png" -o \
+            -name "ic_launcher.xml" -o \
+            -name "ic_launcher_round.xml" \
+          \) -delete
+
+          mkdir -p \
+            "$RES/mipmap-mdpi" \
+            "$RES/mipmap-hdpi" \
+            "$RES/mipmap-xhdpi" \
+            "$RES/mipmap-xxhdpi" \
+            "$RES/mipmap-xxxhdpi"
+
           generate_icon() {
             SIZE=$1
             OUT=$2
-            convert "$ICON_SOURCE" -resize "${SIZE}x${SIZE}^" -gravity center -extent "${SIZE}x${SIZE}" "$OUT"
+            convert "$ICON_SOURCE" \
+              -resize "${SIZE}x${SIZE}^" \
+              -gravity center \
+              -extent "${SIZE}x${SIZE}" \
+              "$OUT"
           }
+
           generate_icon 48 "$RES/mipmap-mdpi/ic_launcher.png"
           generate_icon 48 "$RES/mipmap-mdpi/ic_launcher_round.png"
           generate_icon 72 "$RES/mipmap-hdpi/ic_launcher.png"
@@ -97,15 +159,27 @@ jobs:
           generate_icon 144 "$RES/mipmap-xxhdpi/ic_launcher_round.png"
           generate_icon 192 "$RES/mipmap-xxxhdpi/ic_launcher.png"
           generate_icon 192 "$RES/mipmap-xxxhdpi/ic_launcher_round.png"
-          echo "Launcher icon generation complete."
 
-      - name: Build Debug APK
+      - name: Build Release APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           cd android
-          ./gradlew assembleDebug
+          chmod +x ./gradlew
+          ./gradlew assembleRelease --stacktrace --no-daemon
 
-      - name: Upload APK
+      - name: Prepare Z3MA.apk
+        run: |
+          mkdir -p build-output
+          cp android/app/build/outputs/apk/release/app-release.apk build-output/Z3MA.apk
+          ls -lh build-output/Z3MA.apk
+
+      - name: Upload Z3MA.apk
         uses: actions/upload-artifact@v4
         with:
-          name: z3ma-imposter-debug-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          name: Z3MA.apk
+          path: build-output/Z3MA.apk
+          if-no-files-found: error
+          retention-days: 30
