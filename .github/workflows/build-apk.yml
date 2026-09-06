@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build Release APK
+    name: Build Debug APK
     runs-on: ubuntu-latest
 
     steps:
@@ -94,13 +94,13 @@ jobs:
           convert "$ICON_SOURCE" -resize 192x192 "$RES/mipmap-xxxhdpi/ic_launcher_round.png"
           echo "Launcher icon generation complete."
 
-      - name: Build Release APK
+      - name: Build Debug APK
         run: |
           cd android
-          ./gradlew assembleRelease
+          ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: z3ma-imposter-release-apk
-          path: android/app/build/outputs/apk/release/*.apk
+          name: z3ma-imposter-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
