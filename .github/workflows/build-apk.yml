@@ -41,7 +41,6 @@ jobs:
       - name: Fix Kotlin version conflict
         run: |
           cat >> android/build.gradle << 'EOF'
-
           allprojects {
               configurations.all {
                   resolutionStrategy {
@@ -69,29 +68,39 @@ jobs:
       - name: Set Z3MA Imposter launcher icon
         run: |
           set -e
-
           ICON_SOURCE="public/Icon.jpg"
-
           if [ ! -f "$ICON_SOURCE" ]; then
             echo "ERROR: Launcher icon not found: $ICON_SOURCE"
             exit 1
           fi
-
           RES="android/app/src/main/res"
-
           echo "Removing all Capacitor generated launcher icons..."
-
-          find "$RES" -type f \( \
-          - name "ic_launcher.png" -o \
-          - name "ic_launcher_round.png" -o \
-          - name "ic_launcher.xml" -o \
-          - name "ic_launcher_round.xml" \
-          \) -delete
-
+          find "$RES" -type f \( -name "ic_launcher.png" -o -name "ic_launcher_round.png" -o -name "ic_launcher.xml" -o -name "ic_launcher_round.xml" \) -delete
           mkdir -p "$RES/mipmap-mdpi"
           mkdir -p "$RES/mipmap-hdpi"
           mkdir -p "$RES/mipmap-xhdpi"
           mkdir -p "$RES/mipmap-xxhdpi"
           mkdir -p "$RES/mipmap-xxxhdpi"
+          echo "Creating launcher icon from $ICON_SOURCE..."
+          convert "$ICON_SOURCE" -resize 48x48 "$RES/mipmap-mdpi/ic_launcher.png"
+          convert "$ICON_SOURCE" -resize 48x48 "$RES/mipmap-mdpi/ic_launcher_round.png"
+          convert "$ICON_SOURCE" -resize 72x72 "$RES/mipmap-hdpi/ic_launcher.png"
+          convert "$ICON_SOURCE" -resize 72x72 "$RES/mipmap-hdpi/ic_launcher_round.png"
+          convert "$ICON_SOURCE" -resize 96x96 "$RES/mipmap-xhdpi/ic_launcher.png"
+          convert "$ICON_SOURCE" -resize 96x96 "$RES/mipmap-xhdpi/ic_launcher_round.png"
+          convert "$ICON_SOURCE" -resize 144x144 "$RES/mipmap-xxhdpi/ic_launcher.png"
+          convert "$ICON_SOURCE" -resize 144x144 "$RES/mipmap-xxhdpi/ic_launcher_round.png"
+          convert "$ICON_SOURCE" -resize 192x192 "$RES/mipmap-xxxhdpi/ic_launcher.png"
+          convert "$ICON_SOURCE" -resize 192x192 "$RES/mipmap-xxxhdpi/ic_launcher_round.png"
+          echo "Launcher icon generation complete."
 
-          echo "Creating launcher icon from public
+      - name: Build Release APK
+        run: |
+          cd android
+          ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: z3ma-imposter-release-apk
+          path: android/app/build/outputs/apk/release/*.apk
