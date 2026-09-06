@@ -82,16 +82,21 @@ jobs:
           mkdir -p "$RES/mipmap-xxhdpi"
           mkdir -p "$RES/mipmap-xxxhdpi"
           echo "Creating launcher icon from $ICON_SOURCE..."
-          convert "$ICON_SOURCE" -resize 48x48 "$RES/mipmap-mdpi/ic_launcher.png"
-          convert "$ICON_SOURCE" -resize 48x48 "$RES/mipmap-mdpi/ic_launcher_round.png"
-          convert "$ICON_SOURCE" -resize 72x72 "$RES/mipmap-hdpi/ic_launcher.png"
-          convert "$ICON_SOURCE" -resize 72x72 "$RES/mipmap-hdpi/ic_launcher_round.png"
-          convert "$ICON_SOURCE" -resize 96x96 "$RES/mipmap-xhdpi/ic_launcher.png"
-          convert "$ICON_SOURCE" -resize 96x96 "$RES/mipmap-xhdpi/ic_launcher_round.png"
-          convert "$ICON_SOURCE" -resize 144x144 "$RES/mipmap-xxhdpi/ic_launcher.png"
-          convert "$ICON_SOURCE" -resize 144x144 "$RES/mipmap-xxhdpi/ic_launcher_round.png"
-          convert "$ICON_SOURCE" -resize 192x192 "$RES/mipmap-xxxhdpi/ic_launcher.png"
-          convert "$ICON_SOURCE" -resize 192x192 "$RES/mipmap-xxxhdpi/ic_launcher_round.png"
+          generate_icon() {
+            SIZE=$1
+            OUT=$2
+            convert "$ICON_SOURCE" -resize "${SIZE}x${SIZE}" -gravity center -background none -extent "${SIZE}x${SIZE}" "$OUT"
+          }
+          generate_icon 48 "$RES/mipmap-mdpi/ic_launcher.png"
+          generate_icon 48 "$RES/mipmap-mdpi/ic_launcher_round.png"
+          generate_icon 72 "$RES/mipmap-hdpi/ic_launcher.png"
+          generate_icon 72 "$RES/mipmap-hdpi/ic_launcher_round.png"
+          generate_icon 96 "$RES/mipmap-xhdpi/ic_launcher.png"
+          generate_icon 96 "$RES/mipmap-xhdpi/ic_launcher_round.png"
+          generate_icon 144 "$RES/mipmap-xxhdpi/ic_launcher.png"
+          generate_icon 144 "$RES/mipmap-xxhdpi/ic_launcher_round.png"
+          generate_icon 192 "$RES/mipmap-xxxhdpi/ic_launcher.png"
+          generate_icon 192 "$RES/mipmap-xxxhdpi/ic_launcher_round.png"
           echo "Launcher icon generation complete."
 
       - name: Build Debug APK
