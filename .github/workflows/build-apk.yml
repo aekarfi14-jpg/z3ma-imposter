@@ -85,7 +85,7 @@ jobs:
           generate_icon() {
             SIZE=$1
             OUT=$2
-            convert "$ICON_SOURCE" -resize "${SIZE}x${SIZE}" -gravity center -background none -extent "${SIZE}x${SIZE}" "$OUT"
+            convert "$ICON_SOURCE" -resize "${SIZE}x${SIZE}^" -gravity center -extent "${SIZE}x${SIZE}" "$OUT"
           }
           generate_icon 48 "$RES/mipmap-mdpi/ic_launcher.png"
           generate_icon 48 "$RES/mipmap-mdpi/ic_launcher_round.png"
