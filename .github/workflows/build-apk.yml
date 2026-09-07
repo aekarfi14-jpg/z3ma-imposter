@@ -72,7 +72,7 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 --decode > android/z3ma-release.keystore
           test -s android/z3ma-release.keystore
 
-      - name: Configure Release Signing
+            - name: Configure Release Signing
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -101,11 +101,12 @@ jobs:
                   1
               )
 
-          text = text.replace(
-              "    buildTypes {\n        release {",
-              "    buildTypes {\n        release {\n            signingConfig signingConfigs.release",
-              1
-          )
+          if "signingConfig signingConfigs.release" not in text:
+              text = text.replace(
+                  "    buildTypes {\n        release {",
+                  "    buildTypes {\n        release {\n            signingConfig signingConfigs.release",
+                  1
+              )
 
           path.write_text(text)
           PY
