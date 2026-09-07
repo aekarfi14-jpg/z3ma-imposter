@@ -76,7 +76,6 @@ jobs:
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -90,7 +89,7 @@ jobs:
                       storeFile file("../z3ma-release.keystore")
                       storePassword System.getenv("KEYSTORE_PASSWORD")
                       keyAlias System.getenv("KEY_ALIAS")
-                      keyPassword System.getenv("KEY_PASSWORD")
+                      keyPassword System.getenv("KEYSTORE_PASSWORD")
                   }
               }
           '''
@@ -110,7 +109,6 @@ jobs:
 
           path.write_text(text)
           PY
-
       - name: Install ImageMagick
         run: |
           sudo apt-get update
