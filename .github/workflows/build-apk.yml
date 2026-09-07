@@ -96,11 +96,15 @@ jobs:
           '''
 
           if "signingConfigs {" not in text:
-              text = text.replace("    buildTypes {", signing + "\n    buildTypes {")
+              text = text.replace(
+                  "    buildTypes {",
+                  signing + "\n    buildTypes {",
+                  1
+              )
 
           text = text.replace(
-              "release {\n",
-              "release {\n            signingConfig signingConfigs.release\n",
+              "    buildTypes {\n        release {",
+              "    buildTypes {\n        release {\n            signingConfig signingConfigs.release",
               1
           )
 
