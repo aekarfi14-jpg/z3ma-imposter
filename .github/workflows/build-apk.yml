@@ -169,7 +169,6 @@ jobs:
             -alias z3ma
 
           echo "Keystore verification PASSED."
-
       - name: Configure Release Signing
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
