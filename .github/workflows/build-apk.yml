@@ -154,21 +154,24 @@ jobs:
           echo "Keystore decoded successfully."
           ls -lh android/z3ma-release.keystore
 
-      - name: Verify Release Keystore
+            - name: Verify Release Keystore
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
           set -e
 
-          echo "Checking keystore..."
+          echo "Keystore size:"
+          wc -c android/z3ma-release.keystore
 
+          echo "Keystore SHA256:"
+          sha256sum android/z3ma-release.keystore
+
+          echo "Checking keystore structure..."
           keytool -list \
             -keystore android/z3ma-release.keystore \
             -storetype PKCS12 \
             -storepass "$KEYSTORE_PASSWORD" \
             -alias z3ma
-
-          echo "Keystore verification PASSED."
       - name: Configure Release Signing
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
