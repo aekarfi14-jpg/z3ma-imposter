@@ -163,12 +163,12 @@ jobs:
           echo "Checking keystore..."
 
           keytool -list \
-            -v \
             -keystore android/z3ma-release.keystore \
             -storetype PKCS12 \
             -storepass "$KEYSTORE_PASSWORD" \
-            -alias z3ma \
-            | grep -E "Alias name:|Entry type:|SHA256:"
+            -alias z3ma
+
+          echo "Keystore verification PASSED."
 
       - name: Configure Release Signing
         env:
