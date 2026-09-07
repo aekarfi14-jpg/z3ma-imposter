@@ -154,7 +154,7 @@ jobs:
           echo "Keystore decoded successfully."
           ls -lh android/z3ma-release.keystore
 
-            - name: Verify Release Keystore
+      - name: Verify Release Keystore
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
